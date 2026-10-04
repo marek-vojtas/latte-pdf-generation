@@ -1,6 +1,8 @@
+temp/*
+!temp/.gitkeep
+log/*
+!log/.gitkeep
 vendor/
-temp/
-log/
 .DS_Store
 .idea/
 .vscode/

@@ -12,9 +12,19 @@ class Bootstrap
         $configurator = new Configurator;
         $rootDir = dirname(__DIR__);
 
+        $logDir = $rootDir . '/log';
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0777, true);
+        }
+
+        $tempDir = $rootDir . '/temp';
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0777, true);
+        }
+
         $configurator->setDebugMode(true);
-        $configurator->enableTracy($rootDir . '/log');
-        $configurator->setTempDirectory($rootDir . '/temp');
+        $configurator->enableTracy($logDir);
+        $configurator->setTempDirectory($tempDir);
 
         $configurator->createRobotLoader()
             ->addDirectory(__DIR__)
