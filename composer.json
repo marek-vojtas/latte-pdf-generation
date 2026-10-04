@@ -1,0 +1,19 @@
+{
+    "name": "youngzedplayer/php-canvas-signature-to-pdf",
+    "description": "Digital signature app in Nette Framework with Latte and mPDF",
+    "type": "project",
+    "require": {
+        "php": ">=8.1",
+        "nette/application": "^3.2",
+        "nette/bootstrap": "^3.2",
+        "nette/routing": "^3.1",
+        "latte/latte": "^3.0",
+        "tracy/tracy": "^2.10",
+        "mpdf/mpdf": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}

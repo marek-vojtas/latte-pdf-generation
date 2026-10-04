@@ -1,0 +1,186 @@
+{block content}
+<div class="card">
+    <h1 class="card-title">
+        Demo: PDF Generation with Digital Signatures
+    </h1>
+    <p class="card-subtitle">
+        HTML5 Canvas signature capture and automated PDF export via mPDF
+    </p>
+
+    <form method="post" action="{link generate}" target="_blank" autocomplete="off">
+        <div class="grid-2">
+            <div>
+                <label class="form-label">Protocol Number</label>
+                <input type="text" name="protocol_number" class="form-control" autocomplete="off" required>
+            </div>
+            <div>
+                <label class="form-label">Date</label>
+                <input type="date" name="protocol_date" class="form-control" autocomplete="off" required>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div>
+                <label class="form-label">Sales Representative</label>
+                <input type="text" name="representative_name" class="form-control" autocomplete="off" required>
+            </div>
+            <div>
+                <label class="form-label">Customer (Receiving Party)</label>
+                <input type="text" name="customer_name" class="form-control" autocomplete="off" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Description of Work Performed</label>
+            <textarea name="work_description" rows="3" class="form-control" autocomplete="off" required></textarea>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label class="form-label">
+                    Sales Representative Signature:
+                </label>
+                <div class="signature-box">
+                    <canvas id="representative-sig-canvas" class="signature-canvas"></canvas>
+                </div>
+                <input type="hidden" name="representative_signature" id="representative-sig-input">
+                <div class="signature-actions">
+                    <button type="button" id="clear-representative-sig" class="btn-clear">
+                        Clear Signature
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Customer Signature:
+                </label>
+                <div class="signature-box">
+                    <canvas id="customer-sig-canvas" class="signature-canvas"></canvas>
+                </div>
+                <input type="hidden" name="customer_signature" id="customer-sig-input">
+                <div class="signature-actions">
+                    <button type="button" id="clear-customer-sig" class="btn-clear">
+                        Clear Signature
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">
+                Generate PDF
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector("form");
+    if (form) {
+        form.reset();
+    }
+
+    window.addEventListener("pageshow", function () {
+        if (form) {
+            form.reset();
+        }
+        const repInput = document.getElementById("representative-sig-input");
+        if (repInput) repInput.value = "";
+        const custInput = document.getElementById("customer-sig-input");
+        if (custInput) custInput.value = "";
+    });
+
+    function initSignaturePad(canvasId, inputId, clearBtnId) {
+        const canvas = document.getElementById(canvasId);
+        const input = document.getElementById(inputId);
+        const clearBtn = document.getElementById(clearBtnId);
+        const ctx = canvas.getContext("2d");
+        
+        let drawing = false;
+        
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            if (canvas.width === rect.width && canvas.height === rect.height) {
+                return;
+            }
+            
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(canvas, 0, 0);
+            
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, canvas.width, canvas.height);
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+        
+        function startDrawing(e) {
+            drawing = true;
+            const pos = getMousePos(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+            if (e.cancelable) e.preventDefault();
+        }
+        
+        function draw(e) {
+            if (!drawing) return;
+            const pos = getMousePos(e);
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = "round";
+            ctx.strokeStyle = "#000000";
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            if (e.cancelable) e.preventDefault();
+        }
+        
+        function stopDrawing() {
+            if (!drawing) return;
+            drawing = false;
+            saveSignature();
+        }
+        
+        function saveSignature() {
+            const dataUrl = canvas.toDataURL("image/png");
+            input.value = dataUrl;
+        }
+        
+        canvas.addEventListener("mousedown", startDrawing);
+        canvas.addEventListener("mousemove", draw);
+        document.addEventListener("mouseup", stopDrawing);
+        
+        canvas.addEventListener("touchstart", startDrawing, { passive: false });
+        canvas.addEventListener("touchmove", draw, { passive: false });
+        document.addEventListener("touchend", stopDrawing);
+        
+        clearBtn.addEventListener("click", function() {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            input.value = "";
+        });
+    }
+    
+    initSignaturePad("representative-sig-canvas", "representative-sig-input", "clear-representative-sig");
+    initSignaturePad("customer-sig-canvas", "customer-sig-input", "clear-customer-sig");
+});
+</script>
+{/block}

@@ -1,0 +1,6 @@
+vendor/
+temp/
+log/
+.DS_Store
+.idea/
+.vscode/
